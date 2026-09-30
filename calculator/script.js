@@ -1,0 +1,154 @@
+class Calculator {
+  constructor(historyElement, resultElement) {
+    this.historyElement = historyElement;
+    this.resultElement = resultElement;
+    this.clear();
+  }
+
+  clear() {
+    this.currentOperand = '0';
+    this.previousOperand = '';
+    this.operation = undefined;
+    this.shouldResetScreen = false;
+    this.updateDisplay();
+  }
+
+  delete() {
+    if (this.shouldResetScreen) return;
+    if (this.currentOperand === '0') return;
+    
+    if (this.currentOperand.length === 1) {
+      this.currentOperand = '0';
+    } else {
+      this.currentOperand = this.currentOperand.toString().slice(0, -1);
+    }
+    this.updateDisplay();
+  }
+
+  appendNumber(number) {
+    if (this.currentOperand === '0' || this.shouldResetScreen) {
+      this.currentOperand = '';
+      this.shouldResetScreen = false;
+    }
+    
+    // Prevent multiple decimal points
+    if (number === '.' && this.currentOperand.includes('.')) return;
+    
+    this.currentOperand += number;
+    this.updateDisplay();
+  }
+
+  chooseOperation(operation) {
+    if (this.currentOperand === '' && operation !== '-') return;
+    
+    if (this.previousOperand !== '') {
+      this.compute();
+    }
+
+    this.operation = operation;
+    this.previousOperand = this.currentOperand;
+    this.shouldResetScreen = true;
+    this.updateDisplay();
+  }
+
+  compute() {
+    let computation;
+    const prev = parseFloat(this.previousOperand);
+    const current = parseFloat(this.currentOperand);
+
+    if (isNaN(prev) || isNaN(current)) return;
+
+    switch (this.operation) {
+      case '+':
+        computation = prev + current;
+        break;
+      case '-':
+        computation = prev - current;
+        break;
+      case '*':
+        computation = prev * current;
+        break;
+      case '/':
+        if (current === 0) {
+          alert("Cannot divide by zero!");
+          this.clear();
+          return;
+        }
+        computation = prev / current;
+        break;
+      case '%':
+        computation = prev % current;
+        break;
+      default:
+        return;
+    }
+
+    // Floating-point precision handling
+    this.currentOperand = Math.round(computation * 1e10) / 1e10;
+    this.operation = undefined;
+    this.previousOperand = '';
+    this.shouldResetScreen = true;
+    this.updateDisplay();
+  }
+
+  updateDisplay() {
+    this.resultElement.innerText = this.currentOperand;
+    if (this.operation != null) {
+      const displaySymbol = this.operation === '*' ? '×' : this.operation === '/' ? '÷' : this.operation;
+      this.historyElement.innerText = `${this.previousOperand} ${displaySymbol}`;
+    } else {
+      this.historyElement.innerText = '';
+    }
+  }
+}
+
+// DOM Elements Initialization
+const historyElement = document.getElementById('history');
+const resultElement = document.getElementById('result');
+const calculator = new Calculator(historyElement, resultElement);
+
+// Click events for screen buttons
+document.querySelectorAll('.btn').forEach(button => {
+  button.addEventListener('click', () => {
+    const key = button.getAttribute('data-key');
+    handleInput(key);
+  });
+});
+
+// Keyboard support
+document.addEventListener('keydown', (e) => {
+  let key = e.key;
+
+  // Keyboard mappings
+  if (key === 'Escape' || key.toLowerCase() === 'c') key = 'Clear';
+  if (key.toLowerCase() === 'x') key = '*';
+
+  const validKeys = ['0','1','2','3','4','5','6','7','8','9','.', '+','-','*','/','%','Enter','=','Backspace','Clear'];
+  
+  if (validKeys.includes(key)) {
+    e.preventDefault(); // Prevents default browser shortcut behaviors
+
+    // Button active highlight
+    const button = document.querySelector(`.btn[data-key="${key}"]`);
+    if (button) {
+      button.classList.add('active');
+      setTimeout(() => button.classList.remove('active'), 150);
+    }
+
+    handleInput(key);
+  }
+});
+
+function handleInput(key) {
+  if (!isNaN(key) || key === '.') {
+    calculator.appendNumber(key);
+  } else if (['+', '-', '*', '/', '%'].includes(key)) {
+    calculator.chooseOperation(key);
+  } else if (key === 'Enter' || key === '=') {
+    calculator.compute();
+  } else if (key === 'Backspace') {
+    calculator.delete();
+  } else if (key === 'Clear') {
+    calculator.clear();
+  }
+}
