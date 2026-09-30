@@ -2,18 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Modern Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#e0f2fe" />
+  <title>Calc App</title>
   <link rel="stylesheet" href="style.css" />
   <script src="script.js" defer></script>
 </head>
 <body>
   <div class="calculator">
+    <!-- Top Bar with History Toggle -->
+    <div class="top-bar">
+      <span class="app-title">Calculator</span>
+      <button id="history-toggle" class="icon-btn" title="View History">🕒</button>
+    </div>
+
+    <!-- Main Display -->
     <div class="display">
       <div id="history" class="history"></div>
       <div id="result" class="result">0</div>
     </div>
     
+    <!-- Keypad -->
     <div class="buttons">
       <!-- Row 1 -->
       <button class="btn action" data-key="Clear">AC</button>
@@ -43,6 +52,18 @@
       <button class="btn number zero" data-key="0">0</button>
       <button class="btn number" data-key=".">.</button>
       <button class="btn equal" data-key="Enter">=</button>
+    </div>
+
+    <!-- History Slide Drawer -->
+    <div id="history-drawer" class="history-drawer">
+      <div class="drawer-header">
+        <span>Calculation Log</span>
+        <button id="close-drawer" class="icon-btn">✕</button>
+      </div>
+      <div id="history-list" class="history-list">
+        <p class="empty-msg">No calculations yet</p>
+      </div>
+      <button id="clear-history" class="clear-log-btn">Clear Log</button>
     </div>
   </div>
 </body>
